@@ -1,0 +1,23 @@
+# REINVENT4 TOML input example for sampling
+
+
+
+run_type = "sampling"
+use_cuda = true  # run on the GPU if true, on the CPU if false
+# json_out_config = "_sampling.json"  # write this TOML to JSON
+
+
+[parameters]
+
+## Mol2Mol: find molecules similar to the provided molecules
+model_file = "/home/fts_g_ucla_edu/Projects/REINVENT4/priors/mol2mol_similarity.prior"
+smiles_file = "data/mol2mol.smi"  # 1 compound per line
+sample_strategy = "beamsearch"  # multinomial or beamsearch (deterministic)
+temperature = 1.0 # temperature in multinomial sampling
+tb_logdir = "tb_logs"  # name of the TensorBoard logging directory
+
+output_file = 'data/sampling.csv'  # sampled SMILES and NLL in CSV format
+
+num_smiles = 500  # number of SMILES to be sampled, 1 per input SMILES
+unique_molecules = true  # if true remove all duplicatesd canonicalize smiles
+randomize_smiles = true # if true shuffle atoms in SMILES randomly
