@@ -44,7 +44,7 @@ def write_molecules(num_mols):
 
 def run_reinvent(toml_file):
     # Assuming the reinvent command is installed and accessible
-    command = f"reinvent tomls/{toml_file} --seed 42"
+    command = f"reinvent  tomls/{toml_file} --seed 42"
     subprocess.run(command, shell=True)
 
 def run_docking_pipeline(df):
@@ -65,6 +65,8 @@ def run_docking_pipeline(df):
 
     rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]
     docked_df['rmsd'] = rmsd_list
+
+    df_rmsd_ok = docked_df.query("rmsd <= 2").copy()
 
 def mcs_rmsd(mol_1, mol_2):
     mcs_res = FindMCS([mol_1, mol_2])
