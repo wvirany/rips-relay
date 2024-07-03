@@ -5,7 +5,7 @@ RIPS 2024 Relay Team
 
 ### Usage
 
-To run, simply run `python3 generate_analogs.py` in the terminal. 
+To use, simply run `python3 generate_analogs.py` in the terminal. 
 
 #### Arguments
 
