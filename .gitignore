@@ -1,3 +1,17 @@
+# Data files
+# experiments/data/dataframe.csv
+# experiments/data/sampling.csv
+# experiments/data/mol2mol.smi
+# experiments/data/fragments.smi
+# experiments/data/fragment_lead_pairs.csv
+# experiments/data/docking/5s18.oedu
+# experiments/data/docking/analogs_rings_ok_docked.sdf
+# experiments/data/docking/analogs_rings_ok.oeb
+# experiments/data/docking/analogs_rings_ok.smi
+# experiments/data/docking/analogs_rings_ok.sdf
+# experiments/data/analogs/
+tb_logs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

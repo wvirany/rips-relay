@@ -89,10 +89,12 @@ Input: .toml file with configuration settings
 
 Returns: None
 '''
-def run_reinvent(toml_file):
-    # Assuming the reinvent command is installed and accessible
-    command = f"reinvent priors/{toml_file} --seed 42"
-    subprocess.run(command, shell=True)
+def run_reinvent(priors):
+    
+    for prior in priors:
+        # Assuming the reinvent command is installed and accessible
+        command = f"reinvent priors/{prior}.toml --seed 42"
+        subprocess.run(command, shell=True)
 
 
 '''
@@ -179,7 +181,7 @@ def write_ifp(df):
 
 def main():
     parser = argparse.ArgumentParser(description="Run reinvent and optionally the docking pipeline")
-    parser.add_argument("--toml_file", type=str, help="The path to the TOML file for the reinvent command")
+    # parser.add_argument("--prior", nargs='?', const=False, type=str, help="The path to the TOML file for the reinvent command")
     parser.add_argument("--dock", action="store_true", help="Flag to run the docking pipeline after reinvent")
     parser.add_argument("--generate_ifp", action="store_true", help="Flag to generate the interaction fingerprint as a csv")
     parser.add_argument("--num_mols", type=int, choices=range(1, 236), default=1)
@@ -189,6 +191,13 @@ def main():
     
     args = parser.parse_args()
 
+    priors = ['high_similarity',
+              'medium_similarity',
+              'mmp',
+              'scaffold_generic',
+              'scaffold',
+              'similarity']
+
     # Setup the environment
     setup_environment()
 
@@ -196,10 +205,22 @@ def main():
     write_molecules(args.num_mols, args.input_frag)
 
     # Run reinvent with the provided TOML file
-    run_reinvent(args.toml_file)
+    run_reinvent(priors)
 
     # Read output from reinvent to dataframe
-    df = pd.read_csv('experiments/data/sampling.csv')
+    df = pd.DataFrame()
+
+    for prior in priors:
+        
+        file_path = f'experiments/data/analogs/sampling_{prior}.csv'
+        temp_df = pd.read_csv(file_path)
+
+        df = pd.concat((df, temp_df))
+
+    print(df)
+
+    print(df.columns)
+
 
     if args.lead:
         df.loc[-1] = [args.lead, args.input_frag, None, None]  # adding a row
