@@ -22,3 +22,5 @@ The arguments are
 Included are various python notebooks detailing different experiments. We can include descriptions here
 
 ### [Fragment-Lead Pairs](experiments/fragment_lead_pairs.ipynb)
+
+In this notebook, we attempt to investigate the relationship between the analogs generated from a given hit molecule and the corresponding lead.
