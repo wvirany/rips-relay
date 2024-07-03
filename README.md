@@ -4,7 +4,9 @@ RIPS 2024 Relay Team
 
 ### Usage
 
-To run, simply run `python3 generate_analogs.py` in the terminal. The arguments are
+To run, simply run `python3 generate_analogs.py` in the terminal. 
+
+The arguments are
 
 * `--toml_file` followed by the path of the toml file. This specifies the path of the file used to configure REINVENT4.
 * `--dock` If you add this argument, the pipeline will attempt to dock the analogs to the protein in the `data` folder.
