@@ -1,6 +1,7 @@
 # rips-relay
 RIPS 2024 Relay Team
 
+## Pipeline for generating analogs
 
 ### Usage
 
@@ -13,3 +14,9 @@ The arguments are
 * `--num_molecules` This requires further development. Default is 1. You can specify the number of initial molecules from which to generate analogs.
 * `--remove_odd_rings` Default is True. Set to false if you want to keep molecules with odd ring systems.
 * `--generate_ifp` Default is False. Specify whether or not you would like the interaction fingerprint stores as a csv file.
+
+
+
+## Experiments
+
+Included are various python notebooks detailing different experiments. We can include descriptions here
