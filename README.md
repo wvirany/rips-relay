@@ -1,7 +1,7 @@
 # rips-relay
 RIPS 2024 Relay Team
 
-## Pipeline for generating analogs
+## Pipeline for generating analogs and docking
 
 ### Usage
 
