@@ -48,6 +48,8 @@ Returns: None
 def write_molecules(num_mols, smiles):
 
     if smiles:
+        print(f"\nSMILES string accepted from command line: {smiles}\n")
+
         # Writes input smiles from command line argument to mol2mol.smi
         mol2mol = open("experiments/data/mol2mol.smi", "w")
         mol2mol.write(smiles)
@@ -142,6 +144,9 @@ def run_docking_pipeline(df, generate_ifp):
 
     # If generate_ifp is flagged, write the interaction fingerprint to a csv
     if generate_ifp:
+    
+       assert False, 'Functionality for interaction fingerprint is not yet incorporated' # REMOVE WHEN FUNCTIONALITY FOR IFP IS ADDED
+
        ifp = write_ifp(df)
        return df
     else:
@@ -178,7 +183,8 @@ def main():
     parser.add_argument("--dock", action="store_true", help="Flag to run the docking pipeline after reinvent")
     parser.add_argument("--generate_ifp", action="store_true", help="Flag to generate the interaction fingerprint as a csv")
     parser.add_argument("--num_mols", type=int, choices=range(1, 236), default=1)
-    parser.add_argument('--smiles', nargs='?', const=False, type=str, help='Enter a smiles string for input to reinvent')
+    parser.add_argument('--input_frag', nargs='?', const=False, type=str, help='Enter a smiles string for input to reinvent')
+    parser.add_argument('--lead', nargs='?', const=False, type=str, help='Enter a corresponding lead for which to compare docking score in fragment-lead-pair-style experiments')
     parser.add_argument("--remove_odd_rings", type=bool, choices=[True, False], default=True, help="Turn off to keep generated molecules with odd ring systems")
     
     args = parser.parse_args()
@@ -187,13 +193,20 @@ def main():
     setup_environment()
 
     # Write .smi file with entry molecules
-    write_molecules(args.num_mols, args.smiles)
+    write_molecules(args.num_mols, args.input_frag)
 
     # Run reinvent with the provided TOML file
     run_reinvent(args.toml_file)
 
     # Read output from reinvent to dataframe
     df = pd.read_csv('experiments/data/sampling.csv')
+
+    if args.lead:
+        df.loc[-1] = [args.lead, args.input_frag, None, None]  # adding a row
+        df.index = df.index + 1  # shifting index
+        df.sort_index(inplace=True)
+    
+    print(df)
 
     # Remove odd ring systems
     df = remove_odd_rings(df)
