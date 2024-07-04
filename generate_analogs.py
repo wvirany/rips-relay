@@ -79,7 +79,7 @@ def remove_odd_rings(df):
     df['ring_systems'] = df.SMILES.apply(ring_system_lookup.process_smiles)
     df[['min_ring','min_freq']] = df.ring_systems.apply(uru.get_min_ring_frequency).to_list()
     df = df.query('min_freq > 100').copy()
-    return df.iloc[:,0:3]
+    return df.iloc[:,0:4]
 
 
 '''
@@ -181,7 +181,7 @@ def write_ifp(df):
 
 def main():
     parser = argparse.ArgumentParser(description="Run reinvent and optionally the docking pipeline")
-    # parser.add_argument("--prior", nargs='?', const=False, type=str, help="The path to the TOML file for the reinvent command")
+    # parser.add_argument("--prior", nargs='?', const=1, type=int, help="The path to the TOML file for the reinvent command")
     parser.add_argument("--dock", action="store_true", help="Flag to run the docking pipeline after reinvent")
     parser.add_argument("--generate_ifp", action="store_true", help="Flag to generate the interaction fingerprint as a csv")
     parser.add_argument("--num_mols", type=int, choices=range(1, 236), default=1)
@@ -214,13 +214,11 @@ def main():
         
         file_path = f'experiments/data/analogs/sampling_{prior}.csv'
         temp_df = pd.read_csv(file_path)
+        temp_df['Prior'] = prior
 
         df = pd.concat((df, temp_df))
-
-    print(df)
-
-    print(df.columns)
-
+    
+    df.drop(['NLL'], axis=1, inplace=True)
 
     if args.lead:
         df.loc[-1] = [args.lead, args.input_frag, None, None]  # adding a row
