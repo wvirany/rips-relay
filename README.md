@@ -9,7 +9,6 @@ To use, simply run `python3 generate_analogs.py` in the terminal. You must be at
 
 #### Arguments
 
-* `--toml_file` followed by the path of the toml file. This specifies the path of the file used to configure REINVENT4.
 * `--dock` If you include this argument, the pipeline will attempt to dock the analogs to the protein in the `data` folder.
 * `--num_molecules` This requires further development. Default is 1. You can specify the number of initial molecules from which to generate analogs. They are read from `fragments.smi`.
 * `--input_frag` Provides an option to include input fragment as a SMILES string as a command line argument at runtime. If so, the pipeline does not read molecules from `fragments.smi`.
