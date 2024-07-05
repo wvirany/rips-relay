@@ -116,7 +116,7 @@ def run_docking_pipeline(df, generate_ifp):
     df['Name'] = [f"MOL{i:04d}" for i in range(len(df))]
     df[["SMILES","Name"]].to_csv("experiments/data/docking/analogs_rings_ok.smi", sep=" ", header=None, index=False)
 
-    # Runs the omega and hybrid software to simulate docking
+    # Run omega and hybrid software to simulate docking
     subprocess.run(["/usr/local/openeye/bin/omega2", "-in", "experiments/data/docking/analogs_rings_ok.smi", "-out", "experiments/data/docking/analogs_rings_ok.oeb", "-strictstereo", "false", "-log", "/dev/null"], check=True)
     subprocess.run(["/usr/local/openeye/bin/hybrid", "-receptor", "experiments/data/docking/5s18.oedu", "-dbase", "experiments/data/docking/analogs_rings_ok.oeb", "-out", "experiments/data/docking/analogs_rings_ok_docked.sdf"], check=True)
 
