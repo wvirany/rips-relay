@@ -11,6 +11,9 @@
 # experiments/data/docking/analogs_rings_ok.sdf
 # experiments/data/analogs/
 tb_logs/
+experiments/data/analogs/
+experiments/data/dataframe.csv
+experiments/data/mol2mol.smi
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
