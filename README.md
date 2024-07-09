@@ -29,3 +29,7 @@ A first look at the distributions of generated analogs using the Morgan fingerpr
 ### [Fragment-Lead Pairs](experiments/fragment_lead_pairs.ipynb)
 
 In this notebook, we attempt to investigate the relationship between the analogs generated from a given hit molecule and the corresponding lead.
+
+### [CReM vs. REINVENT: A first look](experiments/crem_vs_reinvent.ipynb)
+
+A first glance at the differences between CReM and REINVENT.
