@@ -14,7 +14,7 @@ tb_logs/
 experiments/data/analogs/
 experiments/data/dataframe.csv
 experiments/data/mol2mol.smi
-tutorials/databases
+crem_db/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
