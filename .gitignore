@@ -13,6 +13,8 @@
 tb_logs/
 experiments/data/
 crem_db/
+experiments/models
+tutorials/models
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

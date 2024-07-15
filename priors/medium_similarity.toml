@@ -28,10 +28,10 @@ model_file = "/home/fts_g_ucla_edu/Projects/REINVENT4/priors/mol2mol_medium_simi
 smiles_file = "experiments/data/mol2mol.smi"  # 1 compound per line
 sample_strategy = "beamsearch"  # multinomial or beamsearch (deterministic)
 temperature = 1.0 # temperature in multinomial sampling
-tb_logdir = "tb_logs"  # name of the TensorBoard logging directory
+# tb_logdir = "tb_logs"  # name of the TensorBoard logging directory
 
 output_file = 'experiments/data/analogs/sampling_medium_similarity.csv'  # sampled SMILES and NLL in CSV format
 
-num_smiles = 500  # number of SMILES to be sampled, 1 per input SMILES
+num_smiles = 200  # number of SMILES to be sampled, 1 per input SMILES
 unique_molecules = true  # if true remove all duplicatesd canonicalize smiles
 randomize_smiles = true # if true shuffle atoms in SMILES randomly
