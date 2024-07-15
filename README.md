@@ -34,6 +34,10 @@ In this notebook, we attempt to investigate the relationship between the analogs
 
 A first glance at the differences between CReM and REINVENT.
 
+### [Visualizations 2](experiments/visualizations_2.ipynb)
+
+A first look at the differences between all four models (i.e., REINVENT, CReM, COATI, and SAFE)
+
 ### [Piggyback](experiments/piggyback.ipynb)
 
 Exploring a model's ability to rediscover leads via "piggybacking"
