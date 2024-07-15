@@ -33,3 +33,7 @@ In this notebook, we attempt to investigate the relationship between the analogs
 ### [CReM vs. REINVENT: A first look](experiments/crem_vs_reinvent.ipynb)
 
 A first glance at the differences between CReM and REINVENT.
+
+### [Piggyback](experiments/piggyback.ipynb)
+
+Exploring a model's ability to rediscover leads via "piggybacking"
