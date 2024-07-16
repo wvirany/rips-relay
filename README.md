@@ -41,3 +41,7 @@ A first look at the differences between all four models (i.e., REINVENT, CReM, C
 ### [Piggyback](experiments/piggyback.ipynb)
 
 Exploring a model's ability to rediscover leads via "piggybacking"
+
+### [Feature Selection w/ Random Forest](experiments/feature_selection.ipynb)
+
+In this experiment, we generated distributions of molecules from each model (REINVENT, CReM, COATI, SAFE). We then trained a random forest to classify the model from which a molecule was generated based on certain metrics from MolScore. Then, we were able to see which features had the highest importance (as determined by the RF), effectively indicating which metrics vary the most across models.
