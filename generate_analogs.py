@@ -96,6 +96,15 @@ def run_reinvent(priors):
         command = f"reinvent priors/{prior}.toml --seed 42"
         subprocess.run(command, shell=True)
 
+def run_crem():
+    pass
+
+def run_coati():
+    pass
+
+def run_safe():
+    pass
+
 
 '''
 Runs the docking pipeline for generated analogs
@@ -106,22 +115,27 @@ Inputs:
 
 Returns: Dataframe and interaction fingerprint
 '''
-def run_docking_pipeline(df, generate_ifp):
+def run_docking_pipeline(df, pdb):
+
+    PDB_FILEPATH = f"experiments/data/docking/{pdb}.pdb"
+    OEDU_FILEPATH = f"experiments/data/docking/{pdb}.oedu"
+    REF_MOL_FILEPATH = f"experiments/data/docking/{pdb}_ligand.sdf"
+
     # Placeholder for docking pipeline execution
     print("\nRunning docking pipeline...\n")
 
     # Additional code for docking pipeline can be added here
-    subprocess.run(["spruce", "-in", "experiments/data/docking/5s18.pdb", "-out", "experiments/data/docking/5s18.oedu"], check=True)
+    subprocess.run(["spruce", "-in", PDB_FILEPATH, "-out", OEDU_FILEPATH], check=True)
 
     df['Name'] = [f"MOL{i:04d}" for i in range(len(df))]
     df[["SMILES","Name"]].to_csv("experiments/data/docking/analogs_rings_ok.smi", sep=" ", header=None, index=False)
 
     # Run omega and hybrid software to simulate docking
     subprocess.run(["/usr/local/openeye/bin/omega2", "-in", "experiments/data/docking/analogs_rings_ok.smi", "-out", "experiments/data/docking/analogs_rings_ok.oeb", "-strictstereo", "false", "-log", "/dev/null"], check=True)
-    subprocess.run(["/usr/local/openeye/bin/hybrid", "-receptor", "experiments/data/docking/5s18.oedu", "-dbase", "experiments/data/docking/analogs_rings_ok.oeb", "-out", "experiments/data/docking/analogs_rings_ok_docked.sdf"], check=True)
+    subprocess.run(["/usr/local/openeye/bin/hybrid", "-receptor", OEDU_FILEPATH, "-dbase", "experiments/data/docking/analogs_rings_ok.oeb", "-out", "experiments/data/docking/analogs_rings_ok_docked.sdf"], check=True)
 
     docked_df = PandasTools.LoadSDF("experiments/data/docking/analogs_rings_ok_docked.sdf") # Loads SDF file to dataframe
-    ref_mol = Chem.MolFromMolFile("experiments/data/docking/5s18_ligand.sdf") # Reads reference ligand provided for binding site
+    ref_mol = Chem.MolFromMolFile(REF_MOL_FILEPATH) # Reads reference ligand provided for binding site
 
     rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
     docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
@@ -144,15 +158,20 @@ def run_docking_pipeline(df, generate_ifp):
     df = df.merge(docked_df[['ID', 'HYBRID Chemgauss4 score']], left_on='Name', right_on='ID', how='left')
     df.rename(columns={'HYBRID Chemgauss4 score' : 'Docking score'}, inplace=True)
 
-    # If generate_ifp is flagged, write the interaction fingerprint to a csv
-    if generate_ifp:
-    
-       assert False, 'Functionality for interaction fingerprint is not yet incorporated' # REMOVE WHEN FUNCTIONALITY FOR IFP IS ADDED
+    SDF_FILEPATH = "data/docking/analogs_rmsd_ok.sdf"
 
-       ifp = write_ifp(df)
-       return df
-    else:
-        return df
+    fp = plf.Fingerprint()
+
+    mol = Chem.MolFromPDBFile(PDB_FILEPATH, removeHs=False)
+    prot = plf.Molecule(mol)
+    suppl = plf.sdf_supplier(SDF_FILEPATH)
+    fp.run_from_iterable(suppl,prot,progress=True)
+    df_ifp = fp.to_dataframe()
+    df_ifp.columns = df.columns.droplevel(0)
+
+    df_ifp.to_csv('data/interaction_fingerprint.csv')
+
+    return df
 
 
 """
@@ -173,22 +192,17 @@ def mcs_rmsd(mol_1, mol_2):
     return min_rmsd
 
 
-"""
-TO DO: Write function that writes interaction fingerprint to a csv
-"""
-def write_ifp(df):
-    pass
-
 def main():
     parser = argparse.ArgumentParser(description="Run reinvent and optionally the docking pipeline")
     # parser.add_argument("--prior", nargs='?', const=1, type=int, help="The path to the TOML file for the reinvent command")
     parser.add_argument("--dock", action="store_true", help="Flag to run the docking pipeline after reinvent")
-    parser.add_argument("--generate_ifp", action="store_true", help="Flag to generate the interaction fingerprint as a csv")
     parser.add_argument("--num_mols", type=int, choices=range(1, 236), default=1)
     parser.add_argument('--input_frag', nargs='?', const=False, type=str, help='Enter a smiles string for input to reinvent')
     parser.add_argument('--lead', nargs='?', const=False, type=str, help='Enter a corresponding lead for which to compare docking score in fragment-lead-pair-style experiments')
     parser.add_argument("--remove_odd_rings", type=bool, choices=[True, False], default=True, help="Turn off to keep generated molecules with odd ring systems")
-    
+    parser.add_argument("--pdb", nargs="?", const=False, type=str, help='Enter the prefix of a .pdb/.sdf file')
+    parser.add_argument("--model", type=str, choices=['reinvent', 'crem', 'coati', 'safe'], default='reinvent', help="Specify which model to use")
+
     args = parser.parse_args()
 
     priors = ['high_similarity',
@@ -225,12 +239,13 @@ def main():
         df.index = df.index + 1  # shifting index
         df.sort_index(inplace=True)
 
-    # Remove odd ring systems
-    df = remove_odd_rings(df)
+    if args.remove_odd_rings:
+        # Remove odd ring systems
+        df = remove_odd_rings(df)
 
     # Conditionally run the docking pipeline
     if args.dock:
-        df = run_docking_pipeline(df, args.generate_ifp)
+        df = run_docking_pipeline(df, args.pdb)
         
     df.to_csv('experiments/data/dataframe.csv')
 
