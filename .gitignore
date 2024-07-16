@@ -14,6 +14,7 @@ tb_logs/
 experiments/data/
 crem_db/
 experiments/models
+experiments/molscore
 tutorials/models
 
 # Byte-compiled / optimized / DLL files

@@ -1,0 +1,91 @@
+{
+  "task": "feature_selection",
+  "output_dir": "/home/fts_g_ucla_edu/Projects/rips-relay/experiments/molscore",
+  "load_from_previous": false,
+  "logging": false,
+  "monitor_app": false,
+  "termination_exit": false,
+  "scoring_functions": [
+    {
+      "name": "MolecularDescriptors",
+      "run": true,
+      "parameters": {
+        "prefix": "desc",
+        "n_jobs": 1
+      }
+    },
+    {
+      "name": "MolecularSimilarity",
+      "run": true,
+      "parameters": {
+        "prefix": "tanimoto",
+        "ref_smiles": [
+          "CCC(=O)c1c(-c2ccccc2)c2cc(Cl)ccc2c(=O)n1Cc1ccc(C(=O)[O-])cc1"
+        ],
+        "fp": "ECFP4",
+        "bits": 2048,
+        "similarity_measure": "Tanimoto",
+        "method": "mean",
+        "n_jobs": 1,
+        "timeout": 60
+      }
+    },
+    {
+      "name":"OEDock",
+      "run":true,
+      "parameters":{
+      "prefix":"Docking",
+      "receptor":"data/docking/2zdt.pdb",
+      "ref_ligand":"data/docking/2zdt_ligand.sdf",
+      "ligand_preparation":"LigPrep",
+      "prep_timeout":30,
+      "omega_energy_window":10,
+      "omega_max_confs":200,
+      "omega_strict_stereo":false,
+      "dock_scoring_function":"Chemgauss4",
+      "dock_search_resolution":"Standard",
+      "dock_num_poses":1
+      }
+    },
+    {
+      "name": "MolecularSimilarity",
+      "run": true,
+      "parameters": {
+        "prefix": "dice",
+        "ref_smiles": [
+          "CCC(=O)c1c(-c2ccccc2)c2cc(Cl)ccc2c(=O)n1Cc1ccc(C(=O)[O-])cc1"
+        ],
+        "fp": "ECFP4",
+        "bits": 2048,
+        "similarity_measure": "Dice",
+        "method": "mean",
+        "n_jobs": 1,
+        "timeout": 60
+      }
+    },
+    {
+      "name": "RAScore_XGB",
+      "run": true,
+      "parameters": {
+        "prefix": "RAScore",
+        "env_engine": "mamba",
+        "model": "ChEMBL"
+      }
+    }
+  ],
+  "scoring": {
+    "metrics": [
+      {
+        "name": "valid_score",
+        "filter": false,
+        "weight": 1.0,
+        "modifier": "raw",
+        "parameters": {}
+      }
+    ],
+    "method": "amean"
+  },
+  "diversity_filter": {
+    "run": false
+  }
+}

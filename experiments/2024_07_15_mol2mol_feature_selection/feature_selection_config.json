@@ -1,0 +1,74 @@
+{
+  "task": "feature_selection",
+  "output_dir": "/home/fts_g_ucla_edu/Projects/rips-relay/experiments",
+  "load_from_previous": false,
+  "logging": false,
+  "monitor_app": false,
+  "termination_exit": false,
+  "scoring_functions": [
+    {
+      "name": "MolecularDescriptors",
+      "run": true,
+      "parameters": {
+        "prefix": "desc",
+        "n_jobs": 1
+      }
+    },
+    {
+      "name": "MolecularSimilarity",
+      "run": true,
+      "parameters": {
+        "prefix": "tanimoto",
+        "ref_smiles": [
+          "CCC(=O)c1c(-c2ccccc2)c2cc(Cl)ccc2c(=O)n1Cc1ccc(C(=O)[O-])cc1"
+        ],
+        "fp": "ECFP4",
+        "bits": 2048,
+        "similarity_measure": "Tanimoto",
+        "method": "mean",
+        "n_jobs": 1,
+        "timeout": 60
+      }
+    },
+    {
+      "name": "MolecularSimilarity",
+      "run": true,
+      "parameters": {
+        "prefix": "dice",
+        "ref_smiles": [
+          "CCC(=O)c1c(-c2ccccc2)c2cc(Cl)ccc2c(=O)n1Cc1ccc(C(=O)[O-])cc1"
+        ],
+        "fp": "ECFP4",
+        "bits": 2048,
+        "similarity_measure": "Dice",
+        "method": "mean",
+        "n_jobs": 1,
+        "timeout": 60
+      }
+    },
+    {
+      "name": "RAScore_XGB",
+      "run": true,
+      "parameters": {
+        "prefix": "RAScore",
+        "env_engine": "mamba",
+        "model": "ChEMBL"
+      }
+    }
+  ],
+  "scoring": {
+    "metrics": [
+      {
+        "name": "valid_score",
+        "filter": false,
+        "weight": 1.0,
+        "modifier": "raw",
+        "parameters": {}
+      }
+    ],
+    "method": "amean"
+  },
+  "diversity_filter": {
+    "run": false
+  }
+}
