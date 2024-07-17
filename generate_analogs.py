@@ -10,18 +10,34 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import mols2grid
-import useful_rdkit_utils as uru
-from rdkit import Chem
-from rdkit.Chem import PandasTools
 import MDAnalysis as mda
 import prolif as plf
+
+from rdkit import Chem
+from rdkit.Chem import AllChem, rdFingerprintGenerator, CanonSmiles, Draw, MolFromSmiles, PandasTools
+from rdkit.Chem.rdmolops import RDKFingerprint
+from rdkit import DataStructs
+from rdkit.DataStructs.cDataStructs import BulkTanimotoSimilarity
+import useful_rdkit_utils as uru
 from rdkit.Chem.rdFMCS import FindMCS
 
+from crem.crem import mutate_mol
+
+import safe as sf
+import datamol as dm
+
+from coati.generative.coati_purifications import embed_smiles
+from coati.models.simple_coati2.io import load_coati2
+
+import torch, gc
 
 '''
 Initializes environment variables and random seed; filters warnings
 '''
 def setup_environment():
+
+    gc.collect()
+    torch.cuda.empty_cache()
 
     warnings.filterwarnings('ignore')
 
@@ -45,26 +61,14 @@ Inputs:
 
 Returns: None
 '''
-def write_molecules(num_mols, smiles):
+def write_molecules(smiles):
 
-    if smiles:
-        print(f"\nSMILES string accepted from command line: {smiles}\n")
+    # Writes input smiles from command line argument to mol2mol.smi
+    mol2mol = open("experiments/data/mol2mol.smi", "w")
+    mol2mol.write(smiles)
+    mol2mol.close()
 
-        # Writes input smiles from command line argument to mol2mol.smi
-        mol2mol = open("experiments/data/mol2mol.smi", "w")
-        mol2mol.write(smiles)
-        mol2mol.close()
-    else:
-        # Opens fragments.smi to read, writes to mol2mol.smi
-        fragments = open("experiments/data/fragments.smi", "r")
-        mol2mol = open("experiments/data/mol2mol.smi", "w")
-
-        for i in range(num_mols):
-            mol = fragments.readline()
-            mol2mol.write(mol)
-
-        fragments.close()
-        mol2mol.close()
+    return smiles
     
 
 '''
@@ -82,6 +86,48 @@ def remove_odd_rings(df):
     return df.iloc[:,0:4]
 
 
+def gen_mol(encoder, tokenizer, smiles, coati_version=1, num_variations=100, noise_scale=0.15):
+
+    # Embed the SMILES string
+    smiles = CanonSmiles(smiles)
+
+    vector = embed_smiles(smiles, encoder, tokenizer)
+
+    # Noise is added as an isotropic Gaussian with std=noise_scale
+   
+    nearby_smiles = encoder.hcoati_to_2d_batch(
+        h_coati=vector.unsqueeze(0).repeat(num_variations, 1),
+        tokenizer=tokenizer,
+        noise_scale=noise_scale,
+    )
+
+    # Retrieve canonical SMILES of generated analogs
+    unique_valid_smiles = list(set([CanonSmiles(smi) for smi in nearby_smiles if MolFromSmiles(smi)]))
+
+    # Store true if original molecule is in the set of generated analogs
+    had_orig = smiles in unique_valid_smiles
+
+    unique_valid_smiles = list(set([smiles] + unique_valid_smiles))
+
+    # Generate molecular fingerprints
+    fp = RDKFingerprint(MolFromSmiles(smiles), minPath=1, maxPath=7, fpSize=2048)
+    fps = [RDKFingerprint(MolFromSmiles(x), minPath=1, maxPath=7, fpSize=2048) for x in unique_valid_smiles]
+
+    # Compute tanimoto similarities between distributions and store as list of strings
+    sim = BulkTanimotoSimilarity(fp, fps)
+    sim_str = [str(round(x, 2)) for x in sim]
+
+    unique_valid_smiles, sim_str = zip(*sorted(zip(unique_valid_smiles, sim_str), key=lambda x:x[1], reverse=True))
+
+    if not had_orig:
+        unique_valid_smiles, sim_str = zip(*[[i, f"{j} (Added)"] if i==smiles else [i, j] for i, j in zip(unique_valid_smiles, sim_str)])
+
+    # Output for molecule generation
+    print (f"Attempted {num_variations} COATI{coati_version} generations with a noise scale of {noise_scale} and generated {len(unique_valid_smiles)} unique structures.")
+        
+    return unique_valid_smiles
+
+
 '''
 Runs the REINVENT4 software to generate analogs
 
@@ -89,21 +135,86 @@ Input: .toml file with configuration settings
 
 Returns: None
 '''
-def run_reinvent(priors):
+def run_reinvent(input_frag):
+
+    # Write .smi file with entry molecules
+    write_molecules(input_frag)
+
+    priors = ['high_similarity',
+              'medium_similarity',
+              'mmp',
+              'scaffold_generic',
+              'scaffold',
+              'similarity']
     
     for prior in priors:
         # Assuming the reinvent command is installed and accessible
         command = f"reinvent priors/{prior}.toml --seed 42"
         subprocess.run(command, shell=True)
 
-def run_crem():
-    pass
+    # Read output from reinvent to dataframe
+    df = pd.DataFrame()
 
-def run_coati():
-    pass
+    for prior in priors:
+        
+        file_path = f'experiments/data/analogs/sampling_{prior}.csv'
+        temp_df = pd.read_csv(file_path)
+        temp_df['Prior'] = prior
 
-def run_safe():
-    pass
+        df = pd.concat((df, temp_df))
+    
+    df.drop(['NLL'], axis=1, inplace=True)
+
+    return df
+
+def run_crem(initial):
+
+    initial_mol = Chem.MolFromSmiles(initial)
+
+    crem_db = 'crem_db/crem_db2.5.db'
+
+    out_list = []
+    mutate_list = list(mutate_mol(initial_mol, db_name=crem_db, return_mol=False))
+
+    for idx, analog in enumerate(mutate_list):
+        out_list.append([analog])
+    
+    df = pd.DataFrame(out_list, columns=["SMILES"])
+
+    df['Model'] = 'crem'
+
+    return df
+
+def run_coati(initial):
+
+    encoder2, tokenizer2 = load_coati2(
+        freeze=True,
+        device=torch.device("cuda:0"),
+        doc_url="s3://terray-public/models/coati2_chiral_03-08-24.pkl"
+    )
+
+    coati_smiles = gen_mol(encoder2, tokenizer2, initial, coati_version = 2, num_variations = 1000, noise_scale = 0.5)
+
+    df = pd.DataFrame()
+    df['SMILES'] = coati_smiles
+    df['Model'] = 'coati'
+
+    return df
+
+
+def run_safe(initial):
+    
+    initial_mol = dm.to_mol(initial)
+
+    designer = sf.SAFEDesign.load_default(verbose=True)
+
+    safe_smiles = designer.de_novo_generation(sanitize=True, n_samples_per_trial=500)
+
+    df = pd.DataFrame()
+    df['SMILES'] = safe_smiles
+    df['Model'] = 'safe'
+
+    return df
 
 
 '''
@@ -142,6 +253,7 @@ def run_docking_pipeline(df, pdb):
 
     df_rmsd_ok = docked_df.query("rmsd <= 2").copy()    # Keep only analogs with less than 2 RMSD with respect to reference ligand
 
+    PandasTools.WriteSDF(df_rmsd_ok,"experiments/data/docking/analogs_rmsd_ok.sdf")
 
     # Generate new columns in dataframe
 
@@ -158,18 +270,18 @@ def run_docking_pipeline(df, pdb):
     df = df.merge(docked_df[['ID', 'HYBRID Chemgauss4 score']], left_on='Name', right_on='ID', how='left')
     df.rename(columns={'HYBRID Chemgauss4 score' : 'Docking score'}, inplace=True)
 
-    SDF_FILEPATH = "data/docking/analogs_rmsd_ok.sdf"
+    SDF_FILEPATH = "experiments/data/docking/analogs_rmsd_ok.sdf"
 
     fp = plf.Fingerprint()
 
     mol = Chem.MolFromPDBFile(PDB_FILEPATH, removeHs=False)
     prot = plf.Molecule(mol)
     suppl = plf.sdf_supplier(SDF_FILEPATH)
-    fp.run_from_iterable(suppl,prot,progress=True)
+    fp.run_from_iterable(suppl, prot, progress=True)
     df_ifp = fp.to_dataframe()
-    df_ifp.columns = df.columns.droplevel(0)
+    df_ifp.columns = df_ifp.columns.droplevel(0)
 
-    df_ifp.to_csv('data/interaction_fingerprint.csv')
+    df_ifp.to_csv('experiments/data/interaction_fingerprint.csv')
 
     return df
 
@@ -194,45 +306,41 @@ def mcs_rmsd(mol_1, mol_2):
 
 def main():
     parser = argparse.ArgumentParser(description="Run reinvent and optionally the docking pipeline")
-    # parser.add_argument("--prior", nargs='?', const=1, type=int, help="The path to the TOML file for the reinvent command")
     parser.add_argument("--dock", action="store_true", help="Flag to run the docking pipeline after reinvent")
-    parser.add_argument("--num_mols", type=int, choices=range(1, 236), default=1)
+    parser.add_argument("--sample", const=False, type=int, help='Enter a number for size of random sample of generated molecules')
     parser.add_argument('--input_frag', nargs='?', const=False, type=str, help='Enter a smiles string for input to reinvent')
     parser.add_argument('--lead', nargs='?', const=False, type=str, help='Enter a corresponding lead for which to compare docking score in fragment-lead-pair-style experiments')
-    parser.add_argument("--remove_odd_rings", type=bool, choices=[True, False], default=True, help="Turn off to keep generated molecules with odd ring systems")
+    parser.add_argument("--remove_odd_rings", action="store_true", help="Flag to filter out molecules containing odd ring systems")
     parser.add_argument("--pdb", nargs="?", const=False, type=str, help='Enter the prefix of a .pdb/.sdf file')
     parser.add_argument("--model", type=str, choices=['reinvent', 'crem', 'coati', 'safe'], default='reinvent', help="Specify which model to use")
 
     args = parser.parse_args()
 
-    priors = ['high_similarity',
-              'medium_similarity',
-              'mmp',
-              'scaffold_generic',
-              'scaffold',
-              'similarity']
-
     # Setup the environment
     setup_environment()
 
-    # Write .smi file with entry molecules
-    write_molecules(args.num_mols, args.input_frag)
+    initial = False
 
-    # Run reinvent with the provided TOML file
-    run_reinvent(priors)
+    if args.input_frag:
+        initial = args.input_frag
 
-    # Read output from reinvent to dataframe
-    df = pd.DataFrame()
+    if args.pdb:
+        initial_mol = Chem.MolFromMolFile(f"experiments/data/docking/{args.pdb}_ligand.sdf")
+        initial = Chem.MolToSmiles(initial_mol)
 
-    for prior in priors:
-        
-        file_path = f'experiments/data/analogs/sampling_{prior}.csv'
-        temp_df = pd.read_csv(file_path)
-        temp_df['Prior'] = prior
 
-        df = pd.concat((df, temp_df))
-    
-    df.drop(['NLL'], axis=1, inplace=True)
+    if args.model=='reinvent':
+        df = run_reinvent(initial)
+    elif args.model=='crem':
+        df = run_crem(initial)
+    elif args.model=='coati':
+        df = run_coati(initial)
+    elif args.model=='safe':
+        df = run_safe(initial)
+
+    if args.sample:
+        df.sample(args.sample, inplace=True)
+
 
     if args.lead:
         df.loc[-1] = [args.lead, args.input_frag, None, None]  # adding a row
@@ -247,7 +355,7 @@ def main():
     if args.dock:
         df = run_docking_pipeline(df, args.pdb)
         
-    df.to_csv('experiments/data/dataframe.csv')
+    df.to_csv(f'experiments/data/{args.model}_dataframe.csv')
 
 
 if __name__ == "__main__":
