@@ -16,6 +16,7 @@ crem_db/
 experiments/models
 experiments/molscore
 tutorials/models
+models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

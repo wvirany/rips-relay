@@ -226,7 +226,7 @@ Inputs:
 
 Returns: Dataframe and interaction fingerprint
 '''
-def run_docking_pipeline(df, pdb):
+def run_docking_pipeline(df, pdb, model):
 
     PDB_FILEPATH = f"experiments/data/docking/{pdb}.pdb"
     OEDU_FILEPATH = f"experiments/data/docking/{pdb}.oedu"
@@ -239,38 +239,40 @@ def run_docking_pipeline(df, pdb):
     subprocess.run(["spruce", "-in", PDB_FILEPATH, "-out", OEDU_FILEPATH], check=True)
 
     df['Name'] = [f"MOL{i:04d}" for i in range(len(df))]
-    df[["SMILES","Name"]].to_csv("experiments/data/docking/analogs_rings_ok.smi", sep=" ", header=None, index=False)
+    df[["SMILES","Name"]].to_csv("experiments/data/docking/analogs.smi", sep=" ", header=None, index=False)
 
     # Run omega and hybrid software to simulate docking
-    subprocess.run(["/usr/local/openeye/bin/omega2", "-in", "experiments/data/docking/analogs_rings_ok.smi", "-out", "experiments/data/docking/analogs_rings_ok.oeb", "-strictstereo", "false", "-log", "/dev/null"], check=True)
-    subprocess.run(["/usr/local/openeye/bin/hybrid", "-receptor", OEDU_FILEPATH, "-dbase", "experiments/data/docking/analogs_rings_ok.oeb", "-out", "experiments/data/docking/analogs_rings_ok_docked.sdf"], check=True)
+    subprocess.run(["/usr/local/openeye/bin/omega2", "-in", "experiments/data/docking/analogs.smi", "-out", "experiments/data/docking/analogs.oeb", "-strictstereo", "false", "-log", "/dev/null"], check=True)
+    subprocess.run(["/usr/local/openeye/bin/hybrid", "-receptor", OEDU_FILEPATH, "-dbase", "experiments/data/docking/analogs.oeb", "-out", "experiments/data/docking/docked.sdf"], check=True)
 
-    docked_df = PandasTools.LoadSDF("experiments/data/docking/analogs_rings_ok_docked.sdf") # Loads SDF file to dataframe
-    ref_mol = Chem.MolFromMolFile(REF_MOL_FILEPATH) # Reads reference ligand provided for binding site
+    docked_df = PandasTools.LoadSDF("experiments/data/docking/docked.sdf") # Loads SDF file to dataframe
+    # ref_mol = Chem.MolFromMolFile(REF_MOL_FILEPATH) # Reads reference ligand provided for binding site
 
-    rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
-    docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
+    # rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
+    # docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
 
-    df_rmsd_ok = docked_df.query("rmsd <= 2").copy()    # Keep only analogs with less than 2 RMSD with respect to reference ligand
+    # df_rmsd_ok = docked_df.query("rmsd <= 4").copy()    # Keep only analogs with less than 2 RMSD with respect to reference ligand
 
-    PandasTools.WriteSDF(df_rmsd_ok,"experiments/data/docking/analogs_rmsd_ok.sdf")
+    # PandasTools.WriteSDF(docked_df,"experiments/data/docking/docked_df.sdf")
 
     # Generate new columns in dataframe
 
-    mol_ids = df_rmsd_ok['ID'].to_numpy()  # Molecular IDS of analogs which docked successfully
+    mol_ids = docked_df['ID'].to_list()  # Molecular IDS of analogs which docked successfully
 
-    df['Success'] = False   # Initialize new column in dataframe indicating successful docking
+    # df['Success'] = False   # Initialize new column in dataframe indicating successful docking
 
-    # Iterate over rows of dataframe of ALL analogs. If molecular ID is present in list of those which docked successfully, set SUCCESS = True for that molecule
-    for index, row in df.iterrows():
-        if row['Name'] in mol_ids:
-            df['Success'][index] = True
+    # # Iterate over rows of dataframe of ALL analogs. If molecular ID is present in list of those which docked successfully, set SUCCESS = True for that molecule
+    # for index, row in df.iterrows():
+    #     if row['Name'] in mol_ids:
+    #         df['Success'][index] = True
 
     # Store docking scores in original dataframe and rename column to 'Docking score'
     df = df.merge(docked_df[['ID', 'HYBRID Chemgauss4 score']], left_on='Name', right_on='ID', how='left')
     df.rename(columns={'HYBRID Chemgauss4 score' : 'Docking score'}, inplace=True)
 
-    SDF_FILEPATH = "experiments/data/docking/analogs_rmsd_ok.sdf"
+    df.drop(['Name'], axis=1, inplace=True)
+
+    SDF_FILEPATH = "experiments/data/docking/docked.sdf"
 
     fp = plf.Fingerprint()
 
@@ -280,8 +282,12 @@ def run_docking_pipeline(df, pdb):
     fp.run_from_iterable(suppl, prot, progress=True)
     df_ifp = fp.to_dataframe()
     df_ifp.columns = df_ifp.columns.droplevel(0)
+    df_ifp['ID'] = mol_ids
 
-    df_ifp.to_csv('experiments/data/interaction_fingerprint.csv')
+
+    IFP_FILEPATH = f'experiments/data/{model}_ifp.csv'
+
+    df_ifp.to_csv(IFP_FILEPATH)
 
     return df
 
@@ -306,13 +312,13 @@ def mcs_rmsd(mol_1, mol_2):
 
 def main():
     parser = argparse.ArgumentParser(description="Run reinvent and optionally the docking pipeline")
-    parser.add_argument("--dock", action="store_true", help="Flag to run the docking pipeline after reinvent")
-    parser.add_argument("--sample", const=False, type=int, help='Enter a number for size of random sample of generated molecules')
+    parser.add_argument("--model", type=str, choices=['reinvent', 'crem', 'coati', 'safe'], default='reinvent', help="Specify which model to use")
     parser.add_argument('--input_frag', nargs='?', const=False, type=str, help='Enter a smiles string for input to reinvent')
     parser.add_argument('--lead', nargs='?', const=False, type=str, help='Enter a corresponding lead for which to compare docking score in fragment-lead-pair-style experiments')
+    parser.add_argument("--sample", nargs="?", const=False, type=int, help='Enter a number for size of random sample of generated molecules')
     parser.add_argument("--remove_odd_rings", action="store_true", help="Flag to filter out molecules containing odd ring systems")
+    parser.add_argument("--dock", action="store_true", help="Flag to run the docking pipeline after reinvent")
     parser.add_argument("--pdb", nargs="?", const=False, type=str, help='Enter the prefix of a .pdb/.sdf file')
-    parser.add_argument("--model", type=str, choices=['reinvent', 'crem', 'coati', 'safe'], default='reinvent', help="Specify which model to use")
 
     args = parser.parse_args()
 
@@ -338,8 +344,8 @@ def main():
     elif args.model=='safe':
         df = run_safe(initial)
 
-    if args.sample:
-        df.sample(args.sample, inplace=True)
+    if args.sample and args.sample < len(df):
+        df = df.sample(args.sample, random_state=42)
 
 
     if args.lead:
@@ -353,9 +359,11 @@ def main():
 
     # Conditionally run the docking pipeline
     if args.dock:
-        df = run_docking_pipeline(df, args.pdb)
+        df = run_docking_pipeline(df, args.pdb, args.model)
         
-    df.to_csv(f'experiments/data/{args.model}_dataframe.csv')
+    DF_FILEPATH = f'experiments/data/{args.model}_dataframe.csv'
+
+    df.to_csv(DF_FILEPATH)
 
 
 if __name__ == "__main__":
