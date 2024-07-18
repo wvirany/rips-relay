@@ -246,10 +246,10 @@ def run_docking_pipeline(df, pdb, model):
     subprocess.run(["/usr/local/openeye/bin/hybrid", "-receptor", OEDU_FILEPATH, "-dbase", "experiments/data/docking/analogs.oeb", "-out", "experiments/data/docking/docked.sdf"], check=True)
 
     docked_df = PandasTools.LoadSDF("experiments/data/docking/docked.sdf") # Loads SDF file to dataframe
-    # ref_mol = Chem.MolFromMolFile(REF_MOL_FILEPATH) # Reads reference ligand provided for binding site
+    ref_mol = Chem.MolFromMolFile(REF_MOL_FILEPATH) # Reads reference ligand provided for binding site
 
-    # rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
-    # docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
+    rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
+    docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
 
     # df_rmsd_ok = docked_df.query("rmsd <= 4").copy()    # Keep only analogs with less than 2 RMSD with respect to reference ligand
 
@@ -267,7 +267,7 @@ def run_docking_pipeline(df, pdb, model):
     #         df['Success'][index] = True
 
     # Store docking scores in original dataframe and rename column to 'Docking score'
-    df = df.merge(docked_df[['ID', 'HYBRID Chemgauss4 score']], left_on='Name', right_on='ID', how='left')
+    df = df.merge(docked_df[['ID', 'HYBRID Chemgauss4 score', 'rmsd']], left_on='Name', right_on='ID', how='left')
     df.rename(columns={'HYBRID Chemgauss4 score' : 'Docking score'}, inplace=True)
 
     df.drop(['Name'], axis=1, inplace=True)
