@@ -9,12 +9,13 @@ To use, simply run `python3 generate_analogs.py` in the terminal. You must be at
 
 #### Arguments
 
-* `--dock` If you include this argument, the pipeline will attempt to dock the analogs to the protein in the `data` folder.
-* `--num_molecules` This requires further development. Default is 1. You can specify the number of initial molecules from which to generate analogs. They are read from `fragments.smi`.
-* `--input_frag` Provides an option to include input fragment as a SMILES string as a command line argument at runtime. If so, the pipeline does not read molecules from `fragments.smi`.
-* `--lead` Provides an option to include a lead molecule for which to compute a docking score. This will be included at the top of the output dataframe in `dataframe.csv`.
-* `--remove_odd_rings` Default is True. Set to false if you want to keep molecules with odd ring systems.
-* `--generate_ifp` Default is False. Specify whether or not you would like the interaction fingerprint stores as a csv file.
+* `--model` Specify which model to use. Choices are `reinvent`, `crem`, `coati`, or `safe`
+* `--input_frag` Provides an option to include input fragment as a SMILES string. If `--pdb` is specified, this will be overwritten by the corresponding reference ligand.
+* `--lead` Provides an option to include a lead molecule for which to compute a docking score. This will be included at the top of the output dataframe in `dataframe.csv`
+* `--sample` Take a sample size from the generated distribution. If the sample size is larger than the size of the distribution, then the entire distribution will be returned
+* `--remove_odd_rings` Flag to pass generated analogs through the `remove_odd_rings` filter
+* `--dock` If you include this argument, the pipeline will attempt to dock the analogs to the protein in the `data` folder. `--pdb` must be specified in this case
+* `--pdb` Enter the prefix of the pdb/sdf file for the protein-ligand pair
 
 
 
