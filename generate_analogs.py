@@ -313,7 +313,7 @@ def mcs_rmsd(mol_1, mol_2):
 def main():
     parser = argparse.ArgumentParser(description="Run reinvent and optionally the docking pipeline")
     parser.add_argument("--model", type=str, choices=['reinvent', 'crem', 'coati', 'safe'], default='reinvent', help="Specify which model to use")
-    parser.add_argument('--input_frag', nargs='?', const=False, type=str, help='Enter a smiles string for input to reinvent')
+    parser.add_argument('--input_frag', nargs='?', const=False, type=str, help='Enter a smiles string for input')
     parser.add_argument('--lead', nargs='?', const=False, type=str, help='Enter a corresponding lead for which to compare docking score in fragment-lead-pair-style experiments')
     parser.add_argument("--sample", nargs="?", const=False, type=int, help='Enter a number for size of random sample of generated molecules')
     parser.add_argument("--remove_odd_rings", action="store_true", help="Flag to filter out molecules containing odd ring systems")
