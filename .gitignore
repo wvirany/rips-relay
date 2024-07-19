@@ -17,6 +17,7 @@ experiments/models
 experiments/molscore
 tutorials/models
 models/
+experiments/lists.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
