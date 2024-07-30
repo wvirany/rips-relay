@@ -203,15 +203,21 @@ def run_coati(initial):
 
 
 def run_safe(initial):
-    
-    initial_mol = dm.to_mol(initial)
 
     designer = sf.SAFEDesign.load_default(verbose=True)
 
-    safe_smiles = designer.de_novo_generation(sanitize=True, n_samples_per_trial=500)
+    generated_smiles = designer.super_structure(
+        core=initial,
+        n_samples_per_trial=500,
+        n_trials=1,
+        sanitize=True,
+        do_not_fragment_further=False,
+        attachment_point_depth=3,
+    )
+
 
     df = pd.DataFrame()
-    df['SMILES'] = safe_smiles
+    df['SMILES'] = generated_smiles
     df['Model'] = 'safe'
 
     return df
