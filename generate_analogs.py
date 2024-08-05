@@ -121,9 +121,6 @@ def gen_mol(encoder, tokenizer, smiles, coati_version=1, num_variations=100, noi
 
     if not had_orig:
         unique_valid_smiles, sim_str = zip(*[[i, f"{j} (Added)"] if i==smiles else [i, j] for i, j in zip(unique_valid_smiles, sim_str)])
-
-    # Output for molecule generation
-    print (f"Attempted {num_variations} COATI{coati_version} generations with a noise scale of {noise_scale} and generated {len(unique_valid_smiles)} unique structures.")
         
     return unique_valid_smiles
 
