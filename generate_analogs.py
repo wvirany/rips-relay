@@ -83,7 +83,7 @@ def remove_odd_rings(df):
     df['ring_systems'] = df.SMILES.apply(ring_system_lookup.process_smiles)
     df[['min_ring','min_freq']] = df.ring_systems.apply(uru.get_min_ring_frequency).to_list()
     df = df.query('min_freq > 100').copy()
-    return df.iloc[:,0:4]
+    return df.loc[:, ['SMILES', 'Model']]
 
 
 def gen_mol(encoder, tokenizer, smiles, coati_version=1, num_variations=100, noise_scale=0.15):
@@ -186,7 +186,7 @@ def run_coati(initial):
 
     encoder2, tokenizer2 = load_coati2(
         freeze=True,
-        device=torch.device("cuda:0"),
+        device=torch.device("cuda:1"),
         doc_url="s3://terray-public/models/coati2_chiral_03-08-24.pkl"
     )
 
@@ -317,6 +317,8 @@ def main():
     parser = argparse.ArgumentParser(description="Run reinvent and optionally the docking pipeline")
 
     parser.add_argument("--model",
+                        nargs='?',
+                        const=False,
                         type=str,
                         choices=['reinvent', 'crem', 'coati', 'safe'],
                         default='reinvent',

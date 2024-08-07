@@ -19,6 +19,7 @@ tutorials/models
 tutorials/all.sdf
 models/
 experiments/lists.pkl
+experiments/lists_docking.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
