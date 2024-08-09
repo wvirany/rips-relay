@@ -1,0 +1,35 @@
+# Parameters settings for HYBRID 4.3.1.0
+#
+#Interface settings
+
+#Execute Options :   
+    #-param (Not set, no default)
+    #-mpi_np (Not set, no default)
+    #-mpi_hostfile (Not set, no default)
+
+#Input :   
+    -receptor  experiments/data/docking/2qd9.oedu
+    -dbase  experiments/data/docking/analogs.oeb
+    #-molnames (Not set, no default)
+
+#Dock Options :   
+    #-dock_resolution  Standard
+
+#Output files :   
+    -docked_molecule_file  experiments/data/docking/docked.sdf
+    #-undocked_molecule_file  undocked.oeb.gz
+    #-score_file  score.txt
+    #-report_file  report.txt
+    #-status_file  status.txt
+    #-settings_file  settings.param
+
+#Output Options :   
+    #-hitlist_size  500
+    #-num_poses  1
+    #-annotate_scores  false
+    #-score_tag (Not set, no default)
+    #-save_component_scores  false
+    #-no_extra_output_files  false
+    #-no_dots  false
+    #-prefix  hybrid
+    #-nostructs  false

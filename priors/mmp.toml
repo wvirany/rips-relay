@@ -3,7 +3,7 @@
 
 
 run_type = "sampling"
-device = "cuda:0"  # run on the GPU if true, on the CPU if false
+device = "cpu"  # run on the GPU if true, on the CPU if false
 # json_out_config = "_sampling.json"  # write this TOML to JSON
 
 

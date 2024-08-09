@@ -44,6 +44,7 @@ def setup_environment():
     # Configuring path variables for OpenEye software
     os.environ["PATH"] += ":/usr/local/openeye/bin"
     os.environ["OE_LICENSE"] = "/home/fts_g_ucla_edu/Projects/oe_license.txt"
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 
     # Setting random seed
     random.seed(42)
@@ -54,8 +55,6 @@ Writes molecules to mol2mol.smi file for input to REINVENT4
 
 Inputs:
 
-- num_mols (default = 1): Number of molecules to be read from fragments.smi and written to mol2mol.smi;
-                          these are then used as initial fragments from which to generate analogs
 - smiles (default = False): If a smiles string is provided at runtime, this is used to generate analogs
                             instead of reading from fragments.smi
 
@@ -83,7 +82,7 @@ def remove_odd_rings(df):
     df['ring_systems'] = df.SMILES.apply(ring_system_lookup.process_smiles)
     df[['min_ring','min_freq']] = df.ring_systems.apply(uru.get_min_ring_frequency).to_list()
     df = df.query('min_freq > 100').copy()
-    return df.loc[:, ['SMILES', 'Model']]
+    return df.loc[:, ['SMILES']]
 
 
 def gen_mol(encoder, tokenizer, smiles, coati_version=1, num_variations=100, noise_scale=0.15):
@@ -186,7 +185,7 @@ def run_coati(initial):
 
     encoder2, tokenizer2 = load_coati2(
         freeze=True,
-        device=torch.device("cuda:1"),
+        device=torch.device("cpu"),
         doc_url="s3://terray-public/models/coati2_chiral_03-08-24.pkl"
     )
 
@@ -251,8 +250,8 @@ def run_docking_pipeline(df, pdb, model):
     docked_df = PandasTools.LoadSDF("experiments/data/docking/docked.sdf") # Loads SDF file to dataframe
     ref_mol = Chem.MolFromMolFile(REF_MOL_FILEPATH) # Reads reference ligand provided for binding site
 
-    rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
-    docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
+    # rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
+    # docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
 
     # df_rmsd_ok = docked_df.query("rmsd <= 4").copy()    # Keep only analogs with less than 2 RMSD with respect to reference ligand
 
@@ -270,27 +269,27 @@ def run_docking_pipeline(df, pdb, model):
     #         df['Success'][index] = True
 
     # Store docking scores in original dataframe and rename column to 'Docking score'
-    df = df.merge(docked_df[['ID', 'HYBRID Chemgauss4 score', 'rmsd']], left_on='Name', right_on='ID', how='left')
+    df = df.merge(docked_df[['ID', 'HYBRID Chemgauss4 score']], left_on='Name', right_on='ID', how='left')
     df.rename(columns={'HYBRID Chemgauss4 score' : 'Docking score'}, inplace=True)
 
     df.drop(['Name'], axis=1, inplace=True)
 
-    SDF_FILEPATH = "experiments/data/docking/docked.sdf"
+    # SDF_FILEPATH = "experiments/data/docking/docked.sdf"
 
-    fp = plf.Fingerprint()
+    # fp = plf.Fingerprint()
 
-    mol = Chem.MolFromPDBFile(PDB_FILEPATH, removeHs=False)
-    prot = plf.Molecule(mol)
-    suppl = plf.sdf_supplier(SDF_FILEPATH)
-    fp.run_from_iterable(suppl, prot, progress=True)
-    df_ifp = fp.to_dataframe()
-    df_ifp.columns = df_ifp.columns.droplevel(0)
-    df_ifp['ID'] = mol_ids
+    # mol = Chem.MolFromPDBFile(PDB_FILEPATH, removeHs=False)
+    # prot = plf.Molecule(mol)
+    # suppl = plf.sdf_supplier(SDF_FILEPATH)
+    # fp.run_from_iterable(suppl, prot, progress=True)
+    # df_ifp = fp.to_dataframe()
+    # df_ifp.columns = df_ifp.columns.droplevel(0)
+    # df_ifp['ID'] = mol_ids
 
 
-    IFP_FILEPATH = f'experiments/data/{model}_ifp.csv'
+    # IFP_FILEPATH = f'experiments/data/{model}_ifp.csv'
 
-    df_ifp.to_csv(IFP_FILEPATH)
+    # df_ifp.to_csv(IFP_FILEPATH)
 
     return df
 

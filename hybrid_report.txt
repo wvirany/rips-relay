@@ -1,0 +1,10 @@
+Molecules docked : 129
+
+Run time : 4m 20s (260.2seconds total)
+Time per molecule 2.02sec
+Docked molecules outputted to experiments/data/docking/docked.sdf
+The following data is attached to SD data of each ligand
+  "HYBRID receptor filename" : filename of the receptor the ligand was docked into
+  "HYBRID receptor title" : title of the receptor the ligand was docked into
+  "HYBRID Chemgauss4 score" : docked score
+Scores were also outputted to text file : hybrid_score.txt

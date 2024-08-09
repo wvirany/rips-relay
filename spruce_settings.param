@@ -1,0 +1,118 @@
+# Parameters settings for spruce: 1.6.0.0
+#
+#Interface settings
+
+#InputOutput :   
+    #-add_receptors  true
+    #-enum_pockets  false
+    -in  experiments/data/docking/2qd9.pdb
+    #-ligand_names (Not set, no default)
+    #-log (Not set, no default)
+    #-map (Not set, no default)
+    #-metadata (Not set, no default)
+    -out  experiments/data/docking/2qd9.oedu
+    #-prefix (Not set, no default)
+    #-ref (Not set, no default)
+    #-settings_file (Not set, no default)
+    #-site_residue (Not set, no default)
+    #-verbose (Not set, no default)
+    #-warts (Not set, no default)
+    #-write_biounits  false
+
+#OEDesignUnitSplitOptions :   
+    #-altloc  enumerate
+    #-cofactor_codes (Not set, no default)
+    #-excipient_codes (Not set, no default)
+    #-lipid_codes (Not set, no default)
+    #-make_packing_residues  true
+    #-max_lig_atoms  100
+    #-max_lig_residues  5
+    #-max_sys_atoms  50000
+    #-min_lig_atoms  8
+    #-target  protein
+
+#OEDesignUnitEnumerateSitesOptions :   
+    #-add_interactions  true
+    #-add_style  true
+    #-collapse_nonsite_alts  true
+    #-duplicate_removal  true
+    #-enum_cofactors_sites  false
+    #-restrict_to_refsite  true
+    #-site_size  5.0
+    #-superpose  true
+    #-superpose_method  site
+
+#OEDesignUnitBuildOptions :   
+    #-build_cterm_caps  true
+    #-build_loops  true
+    #-build_nterm_caps  true
+    #-build_sidechains  true
+    
+    #OESidechainBuilderOptions :   
+        #-rot_coverage  100.0
+        #-rot_library  richardson2016
+        #-sc_delete_clashing_solvent  true
+    
+    #OECapBuilderOptions :   
+        #-allow_truncate  true
+        #-cap_delete_clashing_solvent  true
+    
+    #OELoopBuilderOptions :   
+        #-bb_clash_threshold  0.25
+        #-build_disulfidebridges  true
+        #-build_tails  false
+        #-build_with_crystalpacking  false
+        #-crop_length  1
+        #-incl_SA_term  true
+        #-incl_solvation  true
+        #-loop_clash_threshold  0.2
+        #-loop_db_filename (Not set, no default)
+        #-loop_distance_buffer  1.0
+        #-max_eval_loops  5
+        #-opt_shell  15.0
+        #-opt_stage1_iter_multiplier  5
+        #-opt_stage2_iter_multiplier  10
+        #-opt_tolerance  0.001
+        #-strict_proline_match  true
+        #-transform_threshold  25
+
+#OEDesignUnitPrepOptions :   
+    #-charge_radii  true
+    #-protonate  true
+    #-strict_protonate  false
+
+#OEProtonateDesignUnitOptions :   
+    #-flip_bias_scale  1.0
+    #-generate_tautomers  true
+    #-het_group_nbr_dist  3.5
+    #-opt_expt_protons  false
+
+#OEBioUnitExtractionOptions :   
+    #-bu_superpose  false
+    #-max_bu_atoms  50000
+    #-max_bu_parts  24
+    #-min_align_score  200
+    #-pref_author_record  true
+
+#OEReceptorOptions :   
+    #-targetMask  targetComplexNoSolvent
+
+#Special Options :   
+    #-no_preparation  false
+
+#Enumerate Pocket Options :   
+    #-max_pocket_surf_area  3000.0
+    #-min_pocket_surf_area  150.0
+    #-pocketMask  protein
+    #-pocket_burial_factor  1.4
+
+#Spruce Filter Options :   
+    #-allow_filter_error  false
+    #-allow_validation_error  true
+    #-fix_bb_atoms  true
+    #-fix_bonds_to_metals  true
+    #-fix_chainID  true
+    #-fix_covalent_bond  true
+    #-fix_float_res  true
+    #-fix_res_names  true
+    #-fix_res_states  true
