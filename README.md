@@ -27,21 +27,7 @@ The file directory is structured as follows
 
 Included are various python notebooks detailing different experiments. We can include descriptions here
 
-### [Visualizations](experiments/visualizations.ipynb)
 
-A first look at the distributions of generated analogs using the Morgan fingerprint representation and PCA.
-
-### [Fragment-Lead Pairs](experiments/fragment_lead_pairs.ipynb)
-
-In this notebook, we attempt to investigate the relationship between the analogs generated from a given hit molecule and the corresponding lead.
-
-### [CReM vs. REINVENT: A first look](experiments/crem_vs_reinvent.ipynb)
-
-A first glance at the differences between CReM and REINVENT.
-
-### [Visualizations 2](experiments/visualizations_2.ipynb)
-
-A first look at the differences between all four models (i.e., REINVENT, CReM, COATI, and SAFE)
 
 ### [Piggyback](experiments/piggyback.ipynb)
 
@@ -62,3 +48,23 @@ In this experiment, we aim to understand the properties of the distributions gen
 #### Distributions of docking scores across three target proteins
 
 ![docking_score_distributions](https://github.com/user-attachments/assets/6ae16220-5f48-425e-91fc-edd808132cf1)
+
+
+### Other experiments:
+
+
+#### [Visualizations](experiments/visualizations.ipynb)
+
+A first look at the distributions of generated analogs using the Morgan fingerprint representation and PCA.
+
+#### [Fragment-Lead Pairs](experiments/fragment_lead_pairs.ipynb)
+
+In this notebook, we attempt to investigate the relationship between the analogs generated from a given hit molecule and the corresponding lead.
+
+#### [CReM vs. REINVENT: A first look](experiments/crem_vs_reinvent.ipynb)
+
+A first glance at the differences between CReM and REINVENT.
+
+### [Visualizations 2](experiments/visualizations_2.ipynb)
+
+A first look at the differences between all four models (i.e., REINVENT, CReM, COATI, and SAFE)
