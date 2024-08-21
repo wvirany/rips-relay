@@ -7,9 +7,9 @@ RIPS 2024 Relay Team
 
 The file directory is structured as follow:
 
-**INCLUDE DIRECTORY TREE IMAGE HERE**
+At the top of the directory, we use the `generate_analogs.py` python script to generate molecules, filter out bad molecules, simulate docking, and generate interaction fingerprints. Then, we use Jupyter notebooks, located in the `experiments/` directory, for downstream analysis tasks. The motivation for this was to create a modular process involving two steps: (1) the generation of data and (2) downstream analysis. All Jupyter notebooks should be able to be run from start to finish.
 
-At the top of the directory, we use the `generate_analogs.py` python script to generate molecules, filter out bad molecules, simulate docking, and generate interaction fingerprints. Then, we use Jupyter notebooks, located in the `experiments/` directory, for downstream analysis tasks. All the generated data can be found in the `experiments/data/` directory, as well as `.pdb` and `.sdf` files containing proteins and reference ligands used for docking simulations. The `priors/` folder contains `.toml` files which are used to configure REINVENT settings. 
+All the generated data can be found in the `experiments/data/` directory, as well as `.pdb` and `.sdf` files containing proteins and reference ligands used for docking simulations. The `priors/` directory contains `.toml` files which are used to configure REINVENT settings. The `tutorial/` directory contains tutorials detailing the usage of each of the four models, as well as the docking pipeline.
 
 
 
