@@ -33,7 +33,7 @@ To use, simply run `python3 generate_analogs.py` in the terminal. You must be at
 
 ## Experiments
 
-Included are various python notebooks detailing different experiments. We can include descriptions here
+These are the main experiments with brief descriptions and results.
 
 ### [Piggyback](experiments/piggyback.ipynb)
 
