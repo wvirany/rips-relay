@@ -85,6 +85,9 @@ def remove_odd_rings(df):
     return df.loc[:, ['SMILES']]
 
 
+'''
+Helper function for running COATI as taken from COATI tutorial
+'''
 def gen_mol(encoder, tokenizer, smiles, coati_version=1, num_variations=100, noise_scale=0.15):
 
     # Embed the SMILES string
@@ -224,7 +227,8 @@ Runs the docking pipeline for generated analogs
 
 Inputs: 
 - df: Dataframe containing generated analogs
-- generate_ifp (default = False): Boolean variable indicating whether or not to write interaction fingerprint to csv file
+- pdb: Prefix for target protein-ligand assembly
+- model: Model used to generate analogs
 
 Returns: Dataframe and interaction fingerprint
 '''
@@ -253,7 +257,7 @@ def run_docking_pipeline(df, pdb, model):
     # rmsd_list = [mcs_rmsd(ref_mol, x) for x in docked_df.ROMol.values]  # Computes the RMSD for maximum common substructure between reference ligand and generated analogs
     # docked_df['rmsd'] = rmsd_list   # Stores RMSD between reference ligand and analogs in RMSD column of the dataframe
 
-    # df_rmsd_ok = docked_df.query("rmsd <= 4").copy()    # Keep only analogs with less than 2 RMSD with respect to reference ligand
+    # df_rmsd_ok = docked_df.query("rmsd <= 2").copy()    # Keep only analogs with less than 2 RMSD with respect to reference ligand
 
     # PandasTools.WriteSDF(docked_df,"experiments/data/docking/docked_df.sdf")
 
@@ -274,22 +278,22 @@ def run_docking_pipeline(df, pdb, model):
 
     df.drop(['Name'], axis=1, inplace=True)
 
-    # SDF_FILEPATH = "experiments/data/docking/docked.sdf"
+    SDF_FILEPATH = "experiments/data/docking/docked.sdf"
 
-    # fp = plf.Fingerprint()
+    fp = plf.Fingerprint()
 
-    # mol = Chem.MolFromPDBFile(PDB_FILEPATH, removeHs=False)
-    # prot = plf.Molecule(mol)
-    # suppl = plf.sdf_supplier(SDF_FILEPATH)
-    # fp.run_from_iterable(suppl, prot, progress=True)
-    # df_ifp = fp.to_dataframe()
-    # df_ifp.columns = df_ifp.columns.droplevel(0)
-    # df_ifp['ID'] = mol_ids
+    mol = Chem.MolFromPDBFile(PDB_FILEPATH, removeHs=False)
+    prot = plf.Molecule(mol)
+    suppl = plf.sdf_supplier(SDF_FILEPATH)
+    fp.run_from_iterable(suppl, prot, progress=True)
+    df_ifp = fp.to_dataframe()
+    df_ifp.columns = df_ifp.columns.droplevel(0)
+    df_ifp['ID'] = mol_ids
 
 
-    # IFP_FILEPATH = f'experiments/data/{model}_ifp.csv'
+    IFP_FILEPATH = f'experiments/data/{model}_ifp.csv'
 
-    # df_ifp.to_csv(IFP_FILEPATH)
+    df_ifp.to_csv(IFP_FILEPATH)
 
     return df
 
