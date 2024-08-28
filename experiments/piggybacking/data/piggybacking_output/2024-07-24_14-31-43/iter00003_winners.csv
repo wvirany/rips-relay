@@ -1,0 +1,2 @@
+SMILES,Input_SMILES,Tanimoto,NLL,prior,predecessor,ring_systems,min_ring,min_freq,Name,sim_to_lead,final_score
+Oc1ccc(-c2n[nH]c3cc(-c4ccc(N5CCNCC5)cc4)ccc23)cc1,c1ccc(-c2n[nH]c3cc(-c4ccc(N5CCNCC5)cc4)ccc23)cc1,0.782608695652174,4.074370384216309,sim,c1ccc(-c2n[nH]c3cc(-c4ccc(N5CCNCC5)cc4)ccc23)cc1,"[('c1ccc2[nH]ncc2c1', 15260), ('C1CNCCN1', 137326), ('c1ccccc1', 2260082), ('c1ccccc1', 2260082)]",c1ccc2[nH]ncc2c1,15260,MOL0000,1.0,1.0

@@ -1,0 +1,6 @@
+SMILES,Input_SMILES,Tanimoto,NLL,prior,predecessor,ring_systems,min_ring,min_freq,Name,sim_to_lead,final_score
+Cn1c(N)nc2cc(Cc3ccccc3C#N)cc(C#N)c21,Cn1c(N)nc2cc(Cc3ccccc3Cl)cc(C#N)c21,0.7794117647058824,4.017963409423828,mmp,Cn1c(N)nc2cc(Cc3ccccc3Cl)cc(C#N)c21,"[('c1ccc2[nH]cnc2c1', 43841), ('c1ccccc1', 2260082)]",c1ccc2[nH]cnc2c1,43841,MOL0068,1.0,1.0
+Cn1c(N)nc2cc(Cc3ccccc3C#N)cc(C#N)c21,Cn1c(N)nc2cc(Cc3ccccc3Cl)cc(C#N)c21,0.7794117647058824,4.017963409423828,mmp,Cn1c(N)nc2cc(Cc3ccccc3Cl)cc(C#N)c21,"[('c1ccc2[nH]cnc2c1', 43841), ('c1ccccc1', 2260082)]",c1ccc2[nH]cnc2c1,43841,MOL0068,1.0,1.0
+Cn1c(N)nc2cc(Cc3ccccc3C#N)cc(C#N)c21,Cn1c(N)nc2cc(Cc3ccccc3Cl)cc(C#N)c21,0.7794117647058824,4.017963409423828,mmp,Cn1c(N)nc2cc(Cc3ccccc3Cl)cc(C#N)c21,"[('c1ccc2[nH]cnc2c1', 43841), ('c1ccccc1', 2260082)]",c1ccc2[nH]cnc2c1,43841,MOL0068,1.0,1.0
+Cn1c(N)nc2cc(Cc3ccccc3C#N)cc(C#N)c21,COc1ccccc1Cc1cc(C#N)c2c(c1)nc(N)n2C,0.7464788732394366,3.858054161071777,highsim,COc1ccccc1Cc1cc(C#N)c2c(c1)nc(N)n2C,"[('c1ccc2[nH]cnc2c1', 43841), ('c1ccccc1', 2260082)]",c1ccc2[nH]cnc2c1,43841,MOL0036,1.0,1.0
+Cn1c(N)nc2cc(Cc3ccccc3C#N)cc(C#N)c21,COc1ccccc1Cc1cc(C#N)c2c(c1)nc(N)n2C,0.7464788732394366,3.858054161071777,highsim,COc1ccccc1Cc1cc(C#N)c2c(c1)nc(N)n2C,"[('c1ccc2[nH]cnc2c1', 43841), ('c1ccccc1', 2260082)]",c1ccc2[nH]cnc2c1,43841,MOL0036,1.0,1.0

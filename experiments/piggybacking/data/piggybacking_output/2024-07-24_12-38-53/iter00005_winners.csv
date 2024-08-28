@@ -1,0 +1,2 @@
+SMILES,Input_SMILES,Tanimoto,NLL,prior,predecessor,ring_systems,min_ring,min_freq,Name,sim_to_lead,final_score
+CNc1cccc2c1NC(=O)C2(C)C,CC1(C)C(=O)Nc2c(O)cccc21,0.6590909090909091,4.682478904724121,highsim,CC1(C)C(=O)Nc2c(O)cccc21,"[('O=C1Cc2ccccc2N1', 3204)]",O=C1Cc2ccccc2N1,3204,MOL0033,1.0,1.0

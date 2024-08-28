@@ -1,0 +1,7 @@
+frag_lead_idx: 22 (O=C1Cc2ccccc2N1)
+pdb_type: frag (0)
+model_idx: 0 (reinvent)
+metric weights: [1, 0, 0] (['tanimoto_to_lead', 'docking_score', 'pifp_count'])
+k: 10
+max_iterations: 10
+threshold: 1.0
