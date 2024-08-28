@@ -35,7 +35,7 @@ To use, simply run `python3 generate_analogs.py` in the terminal. You must be at
 
 These are the main experiments with brief descriptions and results.
 
-### [Piggyback](experiments/piggyback.ipynb)
+### [Piggyback](experiments/piggyback)
 
 Exploring a model's ability to rediscover leads via "piggybacking"
 
