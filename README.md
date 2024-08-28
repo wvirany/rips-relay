@@ -35,9 +35,9 @@ To use, simply run `python3 generate_analogs.py` in the terminal. You must be at
 
 These are the main experiments with brief descriptions and results.
 
-### [Piggyback](experiments/piggyback)
+### [Piggyback](experiments/piggybacking)
 
-Exploring a model's ability to rediscover leads via "piggybacking"
+Exploring a model's ability to rediscover leads via "piggybacking" (hit-to-lead optimization)
 
 ### [Feature Selection w/ Random Forest](experiments/feature_selection_final.ipynb)
 
