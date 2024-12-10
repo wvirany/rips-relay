@@ -5,7 +5,7 @@ RIPS 2024 Relay Team
 
 ## Directory Structure
 
-The file directory is structured as follow:
+The file directory is structured as follows:
 
 At the top of the directory, we use the `generate_analogs.py` python script to generate molecules, filter out bad molecules, simulate docking, and generate interaction fingerprints. Then, we use Jupyter notebooks, located in the `experiments/` directory, for downstream analysis tasks. The motivation for this was to create a modular process involving two steps: (1) the generation of data and (2) downstream analysis. All Jupyter notebooks should be able to be run from start to finish.
 
